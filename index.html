@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>YuhVibe | Di Heartbeat a Jamaican Youth Culture</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Montserrat & Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#0a0a0c',
+              gold: '#FFD700',
+              green: '#009B3A',
+              neon: '#00FF66',
+              darkCard: '#141418',
+              border: '#27272a'
+            }
+          },
+          fontFamily: {
+            heading: ['Montserrat', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #0a0a0c;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .feed-container {
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: calc(100vh - 65px);
+    }
+    .feed-item {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      height: calc(100vh - 65px);
+    }
+    .text-glow {
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+<body class="bg-brand-black text-white antialiased flex justify-center items-center min-h-screen">
+
+  <!-- Mobile App Wrapper -->
+  <div class="w-full max-w-md h-screen bg-brand-black flex flex-col relative overflow-hidden shadow-2xl border-x border-brand-border">
+
+    <!-- TOP HEADER -->
+    <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-4 py-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+      <div class="flex items-center space-x-2">
+        <span class="font-heading text-xl font-black tracking-wider text-brand-gold">YUH<span class="text-brand-green">VIBE</span></span>
+        <span class="bg-brand-gold text-black text-[10px] font-bold px-1.5 py-0.5 rounded tracking-tighter">JA 🇯🇲</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button onclick="openModal('searchModal')" class="p-2 text-gray-200 hover:text-brand-gold transition">
+          <i class="fa-solid fa-magnifying-glass text-lg"></i>
+        </button>
+        <button onclick="openModal('cartModal')" class="p-2 text-gray-200 hover:text-brand-gold relative transition">
+          <i class="fa-solid fa-bag-shopping text-lg"></i>
+          <span id="cartCount" class="absolute top-1 right-1 bg-brand-green text-black text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-1 w-full relative overflow-hidden">
+
+      <!-- 1. FEED VIEW -->
+      <section id="viewFeed" class="feed-container w-full h-full no-scrollbar">
+        <!-- Dynamic Feed Items Render Here -->
+      </section>
+
+      <!-- 2. YARDMARKET SHOP VIEW -->
+      <section id="viewShop" class="hidden w-full h-full pt-16 pb-20 overflow-y-auto px-4 no-scrollbar bg-brand-black">
+        <div class="flex justify-between items-center my-3">
+          <h2 class="font-heading text-2xl font-black text-white">YardMarket <span class="text-brand-gold text-sm font-normal">🛒</span></h2>
+          <span class="text-xs text-gray-400">Buy & Sell Local</span>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex space-x-2 my-3">
+          <button id="btnThrift" onclick="filterShop('thrift')" class="flex-1 py-2 rounded-lg font-bold text-xs bg-brand-gold text-black transition">
+            <i class="fa-solid fa-shirt mr-1"></i> Thrift Yard
+          </button>
+          <button id="btnNew" onclick="filterShop('new')" class="flex-1 py-2 rounded-lg font-bold text-xs bg-brand-darkCard text-gray-300 border border-brand-border transition">
+            <i class="fa-solid fa-box-open mr-1"></i> New Drops
+          </button>
+        </div>
+
+        <!-- Search / Tags Bar -->
+        <div class="relative my-3">
+          <input type="text" id="shopSearchInput" onkeyup="searchShop()" placeholder="Search 'creps', 'drip', 'skincare'..." class="w-full bg-brand-darkCard border border-brand-border rounded-xl py-2.5 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-brand-gold">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-gray-400 text-xs"></i>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="shopGrid" class="grid grid-cols-2 gap-3 my-4">
+          <!-- Dynamic Products Render Here -->
+        </div>
+      </section>
+
+      <!-- 3. VIBECLASH BATTLE VIEW -->
+      <section id="viewClash" class="hidden w-full h-full pt-16 pb-20 overflow-y-auto px-4 no-scrollbar bg-brand-black">
+        <div class="text-center my-3">
+          <h2 class="font-heading text-2xl font-black text-brand-gold">VIBE<span class="text-brand-green">CLASH</span> ⚔️</h2>
+          <p class="text-xs text-gray-400">Vote on the hypest Jamaican talent!</p>
+        </div>
+
+        <!-- Clash Card 1 -->
+        <div class="bg-brand-darkCard border border-brand-border rounded-2xl p-4 mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="bg-brand-green/20 text-brand-green text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-brand-green/40">DANCEHALL SOUND CLASH</span>
+            <span class="text-xs text-gray-400"><i class="fa-regular fa-clock mr-1"></i>Ends in 2h</span>
+          </div>
+
+          <!-- Split Screen Battles -->
+          <div class="grid grid-cols-2 gap-2 my-2 relative">
+            <div class="relative rounded-xl overflow-hidden bg-gray-900 aspect-[3/4] flex items-end p-2 border border-brand-gold">
+              <canvas id="clashCanvas1" class="absolute inset-0 w-full h-full object-cover"></canvas>
+              <div class="relative z-10">
+                <span class="bg-black/70 text-brand-gold text-[10px] px-1.5 py-0.5 rounded font-bold">@Skelani_Dancer</span>
+              </div>
+            </div>
+            <div class="relative rounded-xl overflow-hidden bg-gray-900 aspect-[3/4] flex items-end p-2 border border-brand-green">
+              <canvas id="clashCanvas2" class="absolute inset-0 w-full h-full object-cover"></canvas>
+              <div class="relative z-10">
+                <span class="bg-black/70 text-brand-green text-[10px] px-1.5 py-0.5 rounded font-bold">@Killa_Movez</span>
+              </div>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span class="bg-brand-gold text-black font-black text-xs px-2 py-1 rounded-full shadow-lg border border-black">VS</span>
+            </div>
+          </div>
+
+          <!-- Voting Progress -->
+          <div class="my-3">
+            <div class="flex justify-between text-xs font-bold mb-1">
+              <span class="text-brand-gold">Skelani (58%)</span>
+              <span class="text-brand-green">Killa Movez (42%)</span>
+            </div>
+            <div class="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden flex">
+              <div id="voteBar1" class="bg-brand-gold h-full" style="width: 58%"></div>
+              <div id="voteBar2" class="bg-brand-green h-full" style="width: 42%"></div>
+            </div>
+          </div>
+
+          <!-- Vote Buttons -->
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <button onclick="castVote(1)" class="py-2 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/40 text-brand-gold rounded-xl font-bold text-xs flex items-center justify-center space-x-1">
+              <span>🔥 Vote Skelani</span>
+            </button>
+            <button onclick="castVote(2)" class="py-2 bg-brand-green/10 hover:bg-brand-green/20 border border-brand-green/40 text-brand-green rounded-xl font-bold text-xs flex items-center justify-center space-x-1">
+              <span>🔊 Vote Killa</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. HUSTLESPOT GIGS VIEW -->
+      <section id="viewHustle" class="hidden w-full h-full pt-16 pb-20 overflow-y-auto px-4 no-scrollbar bg-brand-black">
+        <div class="flex justify-between items-center my-3">
+          <h2 class="font-heading text-2xl font-black text-white">HustleSpot 💼</h2>
+          <button onclick="openModal('postGigModal')" class="bg-brand-green text-black font-bold text-xs px-3 py-1.5 rounded-lg">
+            + Post Gig
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mb-4">Teen & Student Micro-Gigs across Jamaica</p>
+
+        <div id="gigList" class="space-y-3">
+          <!-- Dynamic Gigs Render Here -->
+        </div>
+      </section>
+
+      <!-- 5. USER PROFILE VIEW -->
+      <section id="viewProfile" class="hidden w-full h-full pt-16 pb-20 overflow-y-auto px-4 no-scrollbar bg-brand-black">
+        <div class="flex flex-col items-center text-center my-4">
+          <div class="relative w-20 h-20 rounded-full border-2 border-brand-gold overflow-hidden p-1 bg-brand-darkCard">
+            <div class="w-full h-full rounded-full bg-gradient-to-tr from-brand-gold to-brand-green flex items-center justify-center text-black font-black text-2xl">
+              KT
+            </div>
+          </div>
+          <h3 class="font-heading font-black text-lg text-white mt-2">Killian Thorne <i class="fa-solid fa-circle-check text-brand-green text-xs"></i></h3>
+          <p class="text-xs text-gray-400">@killian_vibe • Kingston, JA</p>
+          <span class="inline-block bg-brand-gold/10 text-brand-gold text-[10px] font-bold px-2 py-0.5 rounded-full border border-brand-gold/30 mt-1">Verified Seller & Creator</span>
+
+          <!-- Profile Stats -->
+          <div class="flex space-x-6 my-4 bg-brand-darkCard border border-brand-border px-6 py-3 rounded-xl">
+            <div class="text-center">
+              <span class="block font-bold text-sm text-white">1.2k</span>
+              <span class="text-[10px] text-gray-400">Followers</span>
+            </div>
+            <div class="text-center border-x border-brand-border px-6">
+              <span class="block font-bold text-sm text-white">4.8k</span>
+              <span class="text-[10px] text-gray-400">Likes</span>
+            </div>
+            <div class="text-center">
+              <span class="block font-bold text-sm text-brand-green" id="profileEarnings">$14,500</span>
+              <span class="text-[10px] text-gray-400">Sales (JMD)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode Switcher -->
+        <div class="bg-brand-darkCard border border-brand-border rounded-xl p-3 my-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <h4 class="font-bold text-xs text-white">Seller Dashboard</h4>
+              <p class="text-[10px] text-gray-400">Manage products, view orders & earnings</p>
+            </div>
+            <button onclick="openModal('uploadShopModal')" class="bg-brand-gold text-black font-bold text-xs px-3 py-1.5 rounded-lg">
+              + Add Item
+            </button>
+          </div>
+        </div>
+
+        <!-- My Uploaded Items -->
+        <h4 class="font-heading font-bold text-sm my-3 text-gray-200">My Listings & Videos</h4>
+        <div id="myListingsGrid" class="grid grid-cols-3 gap-2">
+          <!-- Dynamic User Items Render Here -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="absolute bottom-0 left-0 right-0 z-30 bg-black/95 border-t border-brand-border flex justify-around items-center py-2 px-1">
+      <button onclick="switchTab('feed')" id="navFeed" class="flex flex-col items-center text-brand-gold">
+        <i class="fa-solid fa-house text-lg"></i>
+        <span class="text-[9px] font-bold mt-0.5">VibeFeed</span>
+      </button>
+      <button onclick="switchTab('shop')" id="navShop" class="flex flex-col items-center text-gray-400 hover:text-white">
+        <i class="fa-solid fa-store text-lg"></i>
+        <span class="text-[9px] font-bold mt-0.5">YardMarket</span>
+      </button>
+
+      <!-- Center Upload Button -->
+      <button onclick="openModal('uploadVideoModal')" class="bg-gradient-to-r from-brand-gold to-brand-green p-3 rounded-full text-black font-black text-sm shadow-lg hover:scale-105 transition transform -translate-y-2">
+        <i class="fa-solid fa-plus text-base"></i>
+      </button>
+
+      <button onclick="switchTab('clash')" id="navClash" class="flex flex-col items-center text-gray-400 hover:text-white">
+        <i class="fa-solid fa-bolt text-lg"></i>
+        <span class="text-[9px] font-bold mt-0.5">VibeClash</span>
+      </button>
+      <button onclick="switchTab('profile')" id="navProfile" class="flex flex-col items-center text-gray-400 hover:text-white">
+        <i class="fa-solid fa-user text-lg"></i>
+        <span class="text-[9px] font-bold mt-0.5">My Yard</span>
+      </button>
+    </nav>
+
+    <!-- MODALS SECTION -->
+
+    <!-- 1. COMMENTS MODAL -->
+    <div id="commentsModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end">
+      <div class="w-full max-w-md bg-brand-darkCard rounded-t-2xl border-t border-brand-border p-4 h-3/4 flex flex-col">
+        <div class="flex justify-between items-center pb-2 border-b border-brand-border">
+          <h3 class="font-bold text-sm">Comments <span id="commentCount" class="text-xs text-gray-400">(0)</span></h3>
+          <button onclick="closeModal('commentsModal')" class="text-gray-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+        <div id="commentsContainer" class="flex-1 overflow-y-auto my-3 space-y-3 no-scrollbar">
+          <!-- Dynamic Comments -->
+        </div>
+        <div class="flex space-x-2 pt-2 border-t border-brand-border">
+          <input type="text" id="commentInput" placeholder="Add a comment..." class="flex-1 bg-black border border-brand-border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-gold text-white">
+          <button onclick="postComment()" class="bg-brand-gold text-black font-bold text-xs px-4 py-2 rounded-xl">Post</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. CART / CHECKOUT MODAL -->
+    <div id="cartModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end">
+      <div class="w-full max-w-md bg-brand-darkCard rounded-t-2xl border-t border-brand-border p-4 h-5/6 flex flex-col">
+        <div class="flex justify-between items-center pb-2 border-b border-brand-border">
+          <h3 class="font-bold text-sm">Your YardMarket Cart 🛒</h3>
+          <button onclick="closeModal('cartModal')" class="text-gray-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <div id="cartList" class="flex-1 overflow-y-auto my-3 space-y-2 no-scrollbar">
+          <!-- Cart Items -->
+        </div>
+
+        <!-- Checkout Form Details -->
+        <div class="space-y-2 pt-2 border-t border-brand-border">
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-400">Total (JMD):</span>
+            <span id="cartTotal" class="font-bold text-brand-green">$0</span>
+          </div>
+
+          <div>
+            <label class="text-[10px] text-gray-400 block mb-1">Select Delivery Method:</label>
+            <select id="deliverySelect" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+              <option value="knutsford">Knutsford Express Courier ($800 JMD)</option>
+              <option value="zipmail">ZipMail Post Office ($500 JMD)</option>
+              <option value="campus">Campus Pick-up (Free - UWI/UTech/NCU)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-[10px] text-gray-400 block mb-1">Select Payment Method:</label>
+            <select id="paymentSelect" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+              <option value="lynk">Lynk Digital Wallet 📱</option>
+              <option value="jamdex">JamDex Digital Currency 🇯🇲</option>
+              <option value="cod">Cash on Delivery / Verified Meetup</option>
+            </select>
+          </div>
+
+          <button onclick="processCheckout()" class="w-full bg-brand-green text-black font-extrabold text-xs py-3 rounded-xl mt-2">
+            Confirm & Pay Order
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. SHOP UPLOAD MODAL -->
+    <div id="uploadShopModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+      <div class="w-full max-w-sm bg-brand-darkCard rounded-2xl border border-brand-border p-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-sm">Sell an Item on YardMarket</h3>
+          <button onclick="closeModal('uploadShopModal')" class="text-gray-400 hover:text-white">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form onsubmit="handleShopUpload(event)" class="space-y-3">
+          <div>
+            <label class="text-[10px] text-gray-400">Item Title</label>
+            <input type="text" id="itemTitle" required placeholder="e.g., Vintage Nike Graphic Tee" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] text-gray-400">Price ($JMD)</label>
+              <input type="number" id="itemPrice" required placeholder="2500" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+            </div>
+            <div>
+              <label class="text-[10px] text-gray-400">Category</label>
+              <select id="itemCategory" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+                <option value="thrift">Thrift Yard (Pre-loved)</option>
+                <option value="new">New Drop (Small Biz)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] text-gray-400">Condition Tag</label>
+            <input type="text" id="itemTag" placeholder="e.g., Gently Used, Brand New" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="text-[10px] text-gray-400">Item Emoji Icon / Visual</label>
+            <input type="text" id="itemEmoji" placeholder="👟, 👕, 🧢, 👗" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+          </div>
+          <button type="submit" class="w-full bg-brand-gold text-black font-bold text-xs py-2.5 rounded-xl">
+            Publish Item
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. VIDEO UPLOAD MODAL -->
+    <div id="uploadVideoModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+      <div class="w-full max-w-sm bg-brand-darkCard rounded-2xl border border-brand-border p-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-sm">Post to VibeFeed</h3>
+          <button onclick="closeModal('uploadVideoModal')" class="text-gray-400 hover:text-white">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form onsubmit="handleVideoUpload(event)" class="space-y-3">
+          <div>
+            <label class="text-[10px] text-gray-400">Caption / Hashtags</label>
+            <input type="text" id="videoCaption" required placeholder="Showing off the new drip! #JamaicanTikTok" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="text-[10px] text-gray-400">Audio / Riddim Name</label>
+            <input type="text" id="videoAudio" required placeholder="Original Sound - DJ Stitchie Riddim" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="text-[10px] text-gray-400">Tag YardMarket Product (Optional)</label>
+            <select id="videoProductTag" class="w-full bg-black border border-brand-border rounded-lg p-2 text-xs text-white">
+              <option value="">None</option>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <button type="submit" class="w-full bg-brand-green text-black font-bold text-xs py-2.5 rounded-xl">
+            Upload Reel
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // --- STATE MANAGEMENT ---
+    let appData = {
+      cart: [],
+      feed: [
+        {
+          id: 1,
+          author: '@jamaican_drip',
+          caption: 'Clean outfit for the weekend linkup! Rate di fit 1-10 🔥 #ThriftYard #Kingston',
+          audio: 'Buju Banton - Champion Riddim',
+          likes: 342,
+          comments: [
+            { user: '@shaq_vibe', text: 'Where yuh get dem shoes bredrin?' },
+            { user: '@jamaican_drip', text: 'YardMarket section bro, check di tagged item!' }
+          ],
+          productTag: { title: 'Air Force 1 Custom', price: 6500, emoji: '👟' },
+          bgGradient: ['#111827', '#065F46']
+        },
+        {
+          id: 2,
+          author: '@skitch_skits',
+          caption: 'When yuh mother send yuh shop and yuh forget di bread 😭🇯🇲 #JamaicanMemes',
+          audio: 'Original Sound - Jamaican Comedy Audio',
+          likes: 890,
+          comments: [
+            { user: '@karen_ja', text: 'Real real thing this! 😂' }
+          ],
+          productTag: null,
+          bgGradient: ['#312E81', '#831843']
+        }
+      ],
+      products: [
+        { id: 101, title: 'Retro Vintage Denim Jacket', price: 3200, category: 'thrift', tag: 'Gently Used', emoji: '🧥', seller: '@thrifty_ja' },
+        { id: 102, title: 'Custom Jamaican Flag Drip Hoodie', price: 4500, category: 'new', tag: 'Brand New', emoji: '👕', seller: '@yard_apparel' },
+        { id: 103, title: 'Fresh Creps / White Airs', price: 6500, category: 'thrift', tag: 'Restored', emoji: '👟', seller: '@jamaican_drip' },
+        { id: 104, title: 'Handmade Glow Lipgloss Set', price: 1500, category: 'new', tag: 'Organic', emoji: '💄', seller: '@glow_ja' }
+      ],
+      gigs: [
+        { title: 'Event Photographer Needed', payout: '$8,000 JMD', location: 'Half Way Tree, Kingston', contact: '8765550192', desc: 'Looking for a teen photographer for a high school birthday party.' },
+        { title: 'Graphic Designer for Album Art', payout: '$5,000 JMD', location: 'Remote / Online', contact: '8765550144', desc: 'Need a dancehall cover art designed fast.' }
+      ]
+    };
+
+    let currentFeedIndex = 0;
+    let activeCommentVideoId = null;
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+      loadLocalStorage();
+      renderFeed();
+      renderShop();
+      renderGigs();
+      renderMyListings();
+      updateCartBadge();
+      initClashCanvases();
+    };
+
+    function loadLocalStorage() {
+      const savedData = localStorage.getItem('yuhvibe_data');
+      if (savedData) {
+        try {
+          appData = JSON.parse(savedData);
+        } catch(e) { console.error(e); }
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem('yuhvibe_data', JSON.stringify(appData));
+    }
+
+    // --- NAVIGATION TAB SWITCHING ---
+    function switchTab(tabName) {
+      const views = ['Feed', 'Shop', 'Clash', 'Hustle', 'Profile'];
+      views.forEach(v => {
+        document.getElementById(`view${v}`).classList.add('hidden');
+        document.getElementById(`nav${v}`).classList.remove('text-brand-gold'); document.getElementById(`nav${v}`).classList.add('text-gray-400');
+      });
+
+      const currentView = document.getElementById(`view${capitalize(tabName)}`); const currentNav = document.getElementById(`nav${capitalize(tabName)}`);
+
+      if (currentView) currentView.classList.remove('hidden');
+      if (currentNav) {
+        currentNav.classList.add('text-brand-gold');
+        currentNav.classList.remove('text-gray-400');
+      }
+    }
+
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    // --- VIBEFEED RENDERER ---
+    function renderFeed() {
+      const feedContainer = document.getElementById('viewFeed');
+      feedContainer.innerHTML = '';
+
+      appData.feed.forEach((item, index) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'feed-item relative w-full flex items-center justify-center p-4 border-b border-brand-border/30';
+        itemEl.style.background = `linear-gradient(135deg, ${item.bgGradient ? item.bgGradient[0] : '#111827'}, ${item.bgGradient ? item.bgGradient[1] : '#065F46'})`;
+
+        itemEl.innerHTML = `
+          <!-- Canvas Visualizer for Audio Wave Video Effect -->
+          <canvas id="feedCanvas_${item.id}" class="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"></canvas>
+
+          <!-- On-Video Overlay Tagged Product -->
+          ${item.productTag ? `
+            <div onclick="quickAddToCart('${item.productTag.title}', ${item.productTag.price})" class="absolute top-16 left-4 z-20 bg-black/80 backdrop-blur border border-brand-gold rounded-full px-3 py-1 flex items-center space-x-2 cursor-pointer shadow-lg animate-bounce">
+              <span class="text-sm">${item.productTag.emoji}</span>
+              <div class="text-[10px]">
+                <span class="block font-bold text-white">${item.productTag.title}</span>
+                <span class="text-brand-gold font-extrabold">$${item.productTag.price} JMD</span>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Video Right Interaction Bar -->
+          <div class="absolute right-3 bottom-24 z-20 flex flex-col items-center space-y-4">
+            <button onclick="likeVideo(${item.id})" class="flex flex-col items-center group">
+              <div class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center text-white group-hover:text-red-500 transition">
+                <i class="fa-solid fa-heart text-lg"></i>
+              </div>
+              <span class="text-[10px] font-bold mt-0.5" id="likes_${item.id}">${item.likes}</span>
+            </button>
+
+            <button onclick="openComments(${item.id})" class="flex flex-col items-center">
+              <div class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center text-white hover:text-brand-gold transition">
+                <i class="fa-solid fa-comment text-lg"></i>
+              </div>
+              <span class="text-[10px] font-bold mt-0.5">${item.comments.length}</span>
+            </button>
+
+            <button onclick="shareVideo('${item.author}')" class="flex flex-col items-center">
+              <div class="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center text-white hover:text-brand-green transition">
+                <i class="fa-solid fa-share text-lg"></i>
+              </div>
+              <span class="text-[10px] font-bold mt-0.5">Share</span>
+            </button>
+          </div>
+
+          <!-- Video Bottom Details -->
+          <div class="absolute left-4 bottom-20 right-16 z-20 text-left">
+            <h4 class="font-bold text-sm text-brand-gold flex items-center">
+              ${item.author}
+              <span class="ml-2 bg-brand-green text-black text-[9px] px-1.5 py-0.2 rounded font-black">Creator</span>
+            </h4>
+            <p class="text-xs text-white my-1 leading-snug">${item.caption}</p>
+            <div class="flex items-center space-x-2 text-[10px] text-gray-300">
+              <i class="fa-solid fa-music text-brand-gold animate-spin"></i>
+              <span class="truncate">${item.audio}</span>
+            </div>
+          </div>
+        `;
+
+        feedContainer.appendChild(itemEl);
+        setTimeout(() => animateFeedCanvas(`feedCanvas_${item.id}`), 100);
+      });
+    }
+
+    // Animated Canvas Sound Wave Simulator
+    function animateFeedCanvas(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      let step = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(255, 217, 0, 0.15)';
+        for (let i = 0; i < 5; i++) {
+          ctx.beginPath();
+          ctx.arc(
+            canvas.width / 2 + Math.sin(step + i) * 40,
+            canvas.height / 2 + Math.cos(step + i) * 60,
+            80 + i * 20,
+            0, Math.PI * 2
+          );
+          ctx.fill();
+        }
+        step += 0.03;
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    function likeVideo(id) {
+      const video = appData.feed.find(v => v.id === id);
+      if (video) {
+        video.likes++;
+        document.getElementById(`likes_${id}`).innerText = video.likes; saveData(); } }  function shareVideo(author) { alert(`Shared ${author}'s vibe to WhatsApp & Instagram! 🇯🇲`);
+    }
+
+    // --- COMMENTS MODAL LOGIC ---
+    function openComments(id) {
+      activeCommentVideoId = id;
+      const video = appData.feed.find(v => v.id === id);
+      if (!video) return;
+
+      document.getElementById('commentCount').innerText = `(${video.comments.length})`;
+      const container = document.getElementById('commentsContainer');
+      container.innerHTML = '';
+
+      video.comments.forEach(c => {
+        container.innerHTML += `
+          <div class="text-xs border-b border-brand-border/40 pb-1.5">
+            <span class="font-bold text-brand-gold">${c.user}</span>
+            <p class="text-gray-200 mt-0.5">${c.text}</p>
+          </div>
+        `;
+      });
+
+      openModal('commentsModal');
+    }
+
+    function postComment() {
+      const input = document.getElementById('commentInput');
+      if (!input.value.trim() || !activeCommentVideoId) return;
+
+      const video = appData.feed.find(v => v.id === activeCommentVideoId);
+      if (video) {
+        video.comments.push({ user: '@killian_vibe', text: input.value.trim() });
+        input.value = '';
+        saveData();
+        openComments(activeCommentVideoId);
+        renderFeed();
+      }
+    }
+
+    // --- YARDMARKET SHOP LOGIC ---
+    function renderShop(filter = 'all') {
+      const grid = document.getElementById('shopGrid');
+      grid.innerHTML = '';
+
+      const filtered = appData.products.filter(p => filter === 'all' || p.category === filter);
+
+      filtered.forEach(p => {
+        grid.innerHTML += `
+          <div class="bg-brand-darkCard border border-brand-border rounded-xl p-2.5 flex flex-col justify-between">
+            <div>
+              <div class="h-24 bg-black/60 rounded-lg flex items-center justify-center text-4xl mb-2 relative">
+                <span>${p.emoji}</span>
+                <span class="absolute top-1 right-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded ${p.category === 'thrift' ? 'bg-brand-gold text-black' : 'bg-brand-green text-black'}">
+                  ${p.tag}
+                </span>
+              </div>
+              <h4 class="font-bold text-xs text-white truncate">${p.title}</h4>
+              <p class="text-[10px] text-gray-400">${p.seller}</p> </div> <div class="flex justify-between items-center mt-3"> <span class="font-black text-xs text-brand-green">$${p.price} JMD</span>
+              <button onclick="addToCart(${p.id})" class="bg-brand-gold text-black p-1.5 rounded-lg text-xs hover:scale-105 transition">
+                <i class="fa-solid fa-cart-plus"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function filterShop(type) {
+      document.getElementById('btnThrift').className = type === 'thrift' ? 'flex-1 py-2 rounded-lg font-bold text-xs bg-brand-gold text-black transition' : 'flex-1 py-2 rounded-lg font-bold text-xs bg-brand-darkCard text-gray-300 border border-brand-border transition';
+      document.getElementById('btnNew').className = type === 'new' ? 'flex-1 py-2 rounded-lg font-bold text-xs bg-brand-green text-black transition' : 'flex-1 py-2 rounded-lg font-bold text-xs bg-brand-darkCard text-gray-300 border border-brand-border transition';
+      renderShop(type);
+    }
+
+    function searchShop() {
+      const q = document.getElementById('shopSearchInput').value.toLowerCase();
+      const grid = document.getElementById('shopGrid');
+      grid.innerHTML = '';
+
+      appData.products.filter(p => p.title.toLowerCase().includes(q) || p.seller.toLowerCase().includes(q)).forEach(p => {
+        grid.innerHTML += `
+          <div class="bg-brand-darkCard border border-brand-border rounded-xl p-2.5 flex flex-col justify-between">
+            <div class="h-20 bg-black/60 rounded-lg flex items-center justify-center text-3xl mb-2">${p.emoji}</div>
+            <h4 class="font-bold text-xs text-white">${p.title}</h4> <span class="font-black text-xs text-brand-green">$${p.price} JMD</span>
+            <button onclick="addToCart(${p.id})" class="mt-2 bg-brand-gold text-black py-1 rounded text-xs font-bold">Add to Cart</button>
+          </div>
+        `;
+      });
+    }
+
+    // --- CART & CHECKOUT SYSTEM ---
+    function addToCart(productId) {
+      const product = appData.products.find(p => p.id === productId);
+      if (product) {
+        appData.cart.push(product);
+        updateCartBadge();
+        saveData();
+        alert(`Added ${product.title} to Cart!`);
+      }
+    }
+
+    function quickAddToCart(title, price) {
+      appData.cart.push({ title, price, emoji: '🛍️' });
+      updateCartBadge();
+      saveData();
+      openModal('cartModal');
+    }
+
+    function updateCartBadge() {
+      document.getElementById('cartCount').innerText = appData.cart.length;
+      renderCartList();
+    }
+
+    function renderCartList() {
+      const list = document.getElementById('cartList');
+      list.innerHTML = '';
+      let total = 0;
+
+      if (appData.cart.length === 0) {
+        list.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">Your cart is empty!</p>';
+      } else {
+        appData.cart.forEach((item, idx) => {
+          total += item.price;
+          list.innerHTML += `
+            <div class="flex justify-between items-center bg-black/50 p-2 rounded-lg border border-brand-border text-xs">
+              <span>${item.emoji || '📦'} ${item.title}</span> <div class="flex items-center space-x-2"> <span class="font-bold text-brand-green">$${item.price} JMD</span>
+                <button onclick="removeFromCart(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button> </div> </div> `; }); }  document.getElementById('cartTotal').innerText = `$${total} JMD`;
+    }
+
+    function removeFromCart(idx) {
+      appData.cart.splice(idx, 1);
+      updateCartBadge();
+      saveData();
+    }
+
+    function processCheckout() {
+      if (appData.cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+      }
+      const payment = document.getElementById('paymentSelect').value;
+      const delivery = document.getElementById('deliverySelect').value;
+
+      alert(`Order Confirmed! 🎉\nPayment Method: ${payment.toUpperCase()}\nDelivery:${delivery.toUpperCase()}\n\nThank you for supporting Jamaican youth business!`);
+      appData.cart = [];
+      updateCartBadge();
+      saveData();
+      closeModal('cartModal');
+    }
+
+    // --- HUSTLESPOT GIGS LOGIC ---
+    function renderGigs() {
+      const container = document.getElementById('gigList');
+      container.innerHTML = '';
+
+      appData.gigs.forEach(gig => {
+        container.innerHTML += `
+          <div class="bg-brand-darkCard border border-brand-border rounded-xl p-3">
+            <div class="flex justify-between items-start">
+              <h4 class="font-bold text-xs text-brand-gold">${gig.title}</h4>
+              <span class="bg-brand-green/20 text-brand-green text-[10px] font-black px-2 py-0.5 rounded border border-brand-green/40">${gig.payout}</span>
+            </div>
+            <p class="text-xs text-gray-300 my-1">${gig.desc}</p>
+            <div class="flex justify-between items-center mt-2 text-[10px] text-gray-400">
+              <span><i class="fa-solid fa-location-dot text-brand-gold mr-1"></i>${gig.location}</span>
+              <a href="https://wa.me/${gig.contact}" target="_blank" class="bg-brand-green text-black font-bold px-2.5 py-1 rounded flex items-center space-x-1">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span>Message</span>
+              </a>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // --- PROFILE & UPLOADS LOGIC ---
+    function renderMyListings() {
+      const grid = document.getElementById('myListingsGrid');
+      grid.innerHTML = '';
+
+      appData.products.slice(0, 3).forEach(p => {
+        grid.innerHTML += `
+          <div class="bg-brand-darkCard border border-brand-border rounded-lg p-2 text-center">
+            <div class="text-2xl">${p.emoji}</div>
+            <span class="block text-[10px] font-bold text-white truncate mt-1">${p.title}</span> <span class="text-[9px] text-brand-green font-black">$${p.price}</span>
+          </div>
+        `;
+      });
+    }
+
+    function handleShopUpload(e) {
+      e.preventDefault();
+      const title = document.getElementById('itemTitle').value;
+      const price = parseInt(document.getElementById('itemPrice').value);
+      const category = document.getElementById('itemCategory').value;
+      const tag = document.getElementById('itemTag').value || 'Fresh Drop';
+      const emoji = document.getElementById('itemEmoji').value || '🛍️';
+
+      const newItem = {
+        id: Date.now(),
+        title,
+        price,
+        category,
+        tag,
+        emoji,
+        seller: '@killian_vibe'
+      };
+
+      appData.products.unshift(newItem);
+      saveData();
+      renderShop();
+      renderMyListings();
+      closeModal('uploadShopModal');
+      alert('Product published to YardMarket! 🛍️');
+    }
+
+    function handleVideoUpload(e) {
+      e.preventDefault();
+      const caption = document.getElementById('videoCaption').value;
+      const audio = document.getElementById('videoAudio').value;
+
+      const newVideo = {
+        id: Date.now(),
+        author: '@killian_vibe',
+        caption,
+        audio,
+        likes: 1,
+        comments: [],
+        productTag: null,
+        bgGradient: ['#065F46', '#111827']
+      };
+
+      appData.feed.unshift(newVideo);
+      saveData();
+      renderFeed();
+      closeModal('uploadVideoModal');
+      switchTab('feed');
+      alert('Your vibe video is live! 🇯🇲🔥');
+    }
+
+    // --- VIBECLASH SIMULATOR ---
+    function initClashCanvases() {
+      ['clashCanvas1', 'clashCanvas2'].forEach((id, idx) => {
+        const c = document.getElementById(id);
+        if (!c) return;
+        const ctx = c.getContext('2d');
+        c.width = c.offsetWidth;
+        c.height = c.offsetHeight;
+
+        let angle = 0;
+        setInterval(() => {
+          ctx.clearRect(0, 0, c.width, c.height);
+          ctx.fillStyle = idx === 0 ? '#FFD700' : '#00FF66';
+          ctx.beginPath();
+          ctx.arc(c.width/2, c.height/2, 30 + Math.sin(angle)*10, 0, Math.PI*2);
+          ctx.fill();
+          angle += 0.1;
+        }, 50);
+      });
+    }
+
+    function castVote(option) {
+      const b1 = document.getElementById('voteBar1');
+      const b2 = document.getElementById('voteBar2');
+      if (option === 1) {
+        b1.style.width = '65%';
+        b2.style.width = '35%';
+      } else {
+        b1.style.width = '50%';
+        b2.style.width = '50%';
+      }
+      alert('Vote counted! 🔊');
+    }
+
+    // --- MODAL HELPERS ---
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
